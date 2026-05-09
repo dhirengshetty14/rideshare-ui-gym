@@ -67,22 +67,51 @@ If the oracle doesn't score 1.0 on every task, the verifier has a bug.
 
 ### 5. Run the LLM agent
 
+The DOM agent works against any LiteLLM-compatible endpoint, so any of
+these options works without code changes — just env vars and a model
+string.
+
+#### Option A — Together AI (Qwen, simplest, ~$0.01/run)
+
+```bash
+export TOGETHER_API_KEY=...   # https://api.together.ai
+python -m eval.run --agent dom --backend litellm \
+    --model together_ai/Qwen/Qwen2.5-7B-Instruct-Turbo \
+    --tasks all --seeds 0
+```
+
+#### Option B — OpenRouter (Qwen, has free tier)
+
+```bash
+export OPENROUTER_API_KEY=...   # https://openrouter.ai
+python -m eval.run --agent dom --backend litellm \
+    --model openrouter/qwen/qwen-2.5-7b-instruct \
+    --tasks all --seeds 0
+```
+
+#### Option C — Anthropic Claude (no Qwen, but native tool-use)
+
 ```bash
 export ANTHROPIC_API_KEY=...
 python -m eval.run --agent dom --backend anthropic --tasks all --seeds 0
 ```
 
-Or with a local Qwen via vLLM/LiteLLM:
+#### Option D — Self-hosted Qwen via vLLM (uses your own GPU)
 
 ```bash
-# In one terminal:
-vllm serve Qwen/Qwen2.5-7B-Instruct --port 8001 --enable-auto-tool-choice
-# In another:
+# Terminal 1: serve Qwen2.5-7B with native tool-call parsing
+vllm serve Qwen/Qwen2.5-7B-Instruct --port 8001 \
+    --enable-auto-tool-choice --tool-call-parser hermes
+
+# Terminal 2: point LiteLLM at the local server
 export OPENAI_API_BASE=http://localhost:8001/v1
 export OPENAI_API_KEY=local-doesnt-matter
 python -m eval.run --agent dom --backend litellm \
     --model openai/Qwen/Qwen2.5-7B-Instruct --tasks all --seeds 0
 ```
+
+If your GPU is on a remote cluster (e.g. SLURM login node), tunnel the
+port: `ssh -N -L 8001:<compute-node>:8001 user@cluster`.
 
 ## What's in here
 
