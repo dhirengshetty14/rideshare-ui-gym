@@ -1,0 +1,32 @@
+[project]
+name = "rideshare-ui-gym"
+version = "0.1.0"
+description = "A UI-based RL gym for rideshare dispatch operations. Agents interact with a browser-style dispatch dashboard via DOM actions; verifiers grade the final state."
+requires-python = ">=3.10"
+
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pydantic>=2.5",
+  "anthropic>=0.40",
+  "openai>=1.30",
+  "litellm>=1.40",
+  "jinja2>=3.1",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+local-llm = [
+  "transformers>=4.45",
+  "torch>=2.4",
+  "accelerate>=0.30",
+  "peft>=0.10",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["server", "agents", "eval"]
