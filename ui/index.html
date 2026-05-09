@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rideshare Dispatch Console — UI Gym</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans">
+
+  <!-- =========================================================================
+       Header — task brief + step counter + control bar
+       ========================================================================= -->
+  <header class="bg-slate-900 text-white px-6 py-3 flex items-center gap-4 shadow-md">
+    <div class="font-bold text-xl tracking-tight">🚗 Rideshare Dispatch Console</div>
+    <div class="ml-auto flex items-center gap-3">
+      <select id="task-picker" data-test-id="select-task"
+              class="text-slate-900 rounded px-2 py-1">
+      </select>
+      <input id="seed-input" type="number" value="0" min="0" max="9999"
+             data-test-id="input-seed"
+             class="text-slate-900 rounded px-2 py-1 w-20" />
+      <button id="reset-btn" data-test-id="btn-reset"
+              class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded font-medium">
+        Reset
+      </button>
+      <span class="text-slate-300 text-sm">step <b id="step-counter" data-test-id="lbl-step">0</b></span>
+    </div>
+  </header>
+
+  <!-- Task banner -->
+  <section id="task-banner" data-test-id="task-banner"
+           class="px-6 py-3 bg-amber-100 border-b border-amber-300">
+    <div class="flex items-baseline gap-3">
+      <span id="task-difficulty" data-test-id="lbl-difficulty"
+            class="px-2 py-0.5 rounded bg-amber-700 text-white text-xs uppercase font-bold">
+        easy
+      </span>
+      <span id="task-id" data-test-id="lbl-task-id" class="font-mono text-sm text-amber-900">
+        easy/match_single_ride
+      </span>
+    </div>
+    <p id="task-brief" data-test-id="lbl-task-brief" class="mt-2 text-amber-950">
+      Loading task...
+    </p>
+  </section>
+
+  <!-- =========================================================================
+       Main grid — drivers (left), riders (center), fraud (right)
+       ========================================================================= -->
+  <main class="grid grid-cols-12 gap-4 p-6">
+
+    <!-- ============== Driver fleet ============== -->
+    <section class="col-span-5 bg-white rounded-lg shadow p-4">
+      <h2 class="font-bold text-lg mb-2 flex items-center gap-2">
+        <span>🚕 Driver Fleet</span>
+        <span id="driver-count" class="text-sm text-slate-500"></span>
+      </h2>
+      <table class="w-full text-sm" data-test-id="table-drivers">
+        <thead class="text-slate-500 text-xs uppercase border-b">
+          <tr>
+            <th class="text-left py-2">ID</th>
+            <th class="text-left">Name</th>
+            <th>Loc</th>
+            <th>Status</th>
+            <th>★</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="driver-rows"></tbody>
+      </table>
+    </section>
+
+    <!-- ============== Rider queue ============== -->
+    <section class="col-span-4 bg-white rounded-lg shadow p-4">
+      <h2 class="font-bold text-lg mb-2 flex items-center gap-2">
+        <span>🧍 Rider Queue</span>
+        <span id="rider-count" class="text-sm text-slate-500"></span>
+      </h2>
+      <table class="w-full text-sm" data-test-id="table-riders">
+        <thead class="text-slate-500 text-xs uppercase border-b">
+          <tr>
+            <th class="text-left py-2">ID</th>
+            <th class="text-left">Pickup</th>
+            <th>Waited</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rider-rows"></tbody>
+      </table>
+    </section>
+
+    <!-- ============== Fraud review panel ============== -->
+    <section class="col-span-3 bg-white rounded-lg shadow p-4">
+      <h2 class="font-bold text-lg mb-2">🛡️ Fraud Review</h2>
+      <div id="fraud-rows" class="space-y-3" data-test-id="panel-fraud"></div>
+      <div id="fraud-empty" class="text-sm text-slate-400 italic">
+        No alerts.
+      </div>
+    </section>
+
+    <!-- ============== Trip / message log ============== -->
+    <section class="col-span-12 bg-white rounded-lg shadow p-4">
+      <h2 class="font-bold text-lg mb-2">📋 Activity Log</h2>
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <h3 class="text-sm font-semibold uppercase text-slate-500 mb-1">Trips</h3>
+          <ul id="trips-list" class="text-sm space-y-1" data-test-id="list-trips"></ul>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold uppercase text-slate-500 mb-1">Messages</h3>
+          <ul id="messages-list" class="text-sm space-y-1" data-test-id="list-messages"></ul>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold uppercase text-slate-500 mb-1">Audit</h3>
+          <ul id="audit-list" class="text-sm space-y-1 text-slate-700" data-test-id="list-audit"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================================
+       Submit button + verifier result
+       ========================================================================= -->
+  <footer class="px-6 pb-8 flex items-center gap-4">
+    <button id="submit-btn" data-test-id="btn-submit-task"
+            class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded font-bold disabled:opacity-50">
+      ✅ Submit task
+    </button>
+    <div id="verifier-result" data-test-id="lbl-verifier-result" class="text-sm"></div>
+  </footer>
+
+  <!-- =========================================================================
+       Modals (dispatch confirm / message compose / block confirm)
+       ========================================================================= -->
+  <div id="modal-root" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+       data-test-id="modal-root">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-[480px]">
+      <h3 id="modal-title" class="text-lg font-bold mb-2" data-test-id="lbl-modal-title">Modal</h3>
+      <div id="modal-body" class="space-y-3" data-test-id="modal-body"></div>
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="modal-cancel" data-test-id="btn-modal-cancel"
+                class="px-3 py-1 rounded border">Cancel</button>
+        <button id="modal-confirm" data-test-id="btn-modal-confirm"
+                class="px-3 py-1 rounded bg-blue-600 text-white font-medium">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

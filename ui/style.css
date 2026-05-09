@@ -1,0 +1,38 @@
+/* Tiny custom styling on top of Tailwind. Most styling is utility classes
+   in index.html; this file only handles things Tailwind can't express
+   cleanly (status pills, hover overlays, etc). */
+
+.status-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-idle    { background: #d1fae5; color: #065f46; }
+.status-en_route{ background: #fef3c7; color: #92400e; }
+.status-offline { background: #e2e8f0; color: #475569; }
+.status-blocked { background: #fecaca; color: #7f1d1d; }
+.status-waiting { background: #dbeafe; color: #1e40af; }
+.status-assigned{ background: #ddd6fe; color: #5b21b6; }
+.status-completed{background: #d1fae5; color: #065f46; }
+.status-cancelled{background: #fecaca; color: #7f1d1d; }
+
+.severity-low    { color: #475569; }
+.severity-medium { color: #b45309; }
+.severity-high   { color: #b91c1c; font-weight: 600; }
+
+tr.flagged-row {
+  background: #fef2f2;
+}
+
+.priority-rider {
+  border-left: 4px solid #dc2626;
+  padding-left: 8px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
